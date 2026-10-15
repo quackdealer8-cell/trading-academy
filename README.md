@@ -43,9 +43,8 @@
 
 ## 🚀 Live Demo
 
-You can try the live app here:  
-👉 **[View Live Web App](https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPOSITORY-NAME/)**  
-*(Be sure to replace the link above with your actual GitHub Pages URL!)*
+You can try the live web app here:  
+👉 **[Launch Trading Academy](https://quackdealer8-cell.github.io/trading-academy/)**
 
 ---
 
