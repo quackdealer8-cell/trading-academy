@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Academy | Day Trading Practice Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darknavy: '#0b0f19',
+                        carddark: '#111827',
+                        cardborder: '#1f2937',
+                        electricblue: '#3b82f6',
+                        accentgreen: '#10b981',
+                        accentred: '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Simulator and Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row bg-darknavy text-gray-100 antialiased selection:bg-electricblue selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Mobile Header -->
+    <header class="md:hidden flex items-center justify-between bg-carddark border-b border-cardborder px-4 py-3 sticky top-0 z-40">
+        <div class="flex items-center space-x-2">
+            <div class="bg-electricblue text-white p-2 rounded-lg font-bold text-lg"><i class="fa-solid fa-chart-line"></i></div>
+            <span class="font-bold text-lg tracking-tight">Trading Academy</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none p-2 rounded-lg bg-cardborder">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-carddark border-r border-cardborder transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="p-6 border-b border-cardborder hidden md:flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-electricblue to-cyan-500 text-white p-2.5 rounded-xl shadow-lg shadow-electricblue/20">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight text-white leading-tight">Trading Academy</h1>
+                <span class="text-xs text-electricblue font-medium tracking-wide uppercase">Virtual Practice Hub</span>
+            </div>
+        </div>
+
+        <!-- Student Profile Summary in Sidebar -->
+        <div class="p-4 mx-4 mt-4 bg-darknavy/60 rounded-xl border border-cardborder">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-electricblue/20 border border-electricblue text-electricblue flex items-center justify-center font-bold">
+                    <span id="sidebar-initials">ST</span>
+                </div>
+                <div class="overflow-hidden">
+                    <h4 class="text-sm font-semibold text-white truncate" id="sidebar-username">Student Trader</h4>
+                    <p class="text-xs text-gray-400 truncate" id="sidebar-rank">Level 1 Beginner</p>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-cardborder flex justify-between text-xs">
+                <span class="text-gray-400">Virtual Balance:</span>
+                <span class="font-bold text-accentgreen" id="sidebar-balance">$10,000.00</span>
+            </div>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+            <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-electricblue text-white shadow-lg shadow-electricblue/20" data-target="dashboard">
+                <i class="fa-solid fa-house w-5"></i>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('lessons')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="lessons">
+                <i class="fa-solid fa-graduation-cap w-5"></i>
+                <span>Learning Lessons</span>
+            </button>
+            <button onclick="switchTab('simulator')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="simulator">
+                <i class="fa-solid fa-laptop-code w-5"></i>
+                <span>Trading Simulator</span>
+            </button>
+            <button onclick="switchTab('calculator')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="calculator">
+                <i class="fa-solid fa-calculator w-5"></i>
+                <span>Risk Calculator</span>
+            </button>
+            <button onclick="switchTab('challenges')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="challenges">
+                <i class="fa-solid fa-bullseye w-5"></i>
+                <span>Practice Challenges</span>
+            </button>
+            <button onclick="switchTab('mistakes')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="mistakes">
+                <i class="fa-solid fa-triangle-exclamation w-5"></i>
+                <span>My Mistakes</span>
+                <span id="mistake-badge-count" class="ml-auto bg-accentred/20 text-accentred text-xs px-2 py-0.5 rounded-full font-bold hidden">0</span>
+            </button>
+            <button onclick="switchTab('achievements')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="achievements">
+                <i class="fa-solid fa-award w-5"></i>
+                <span>Achievements</span>
+            </button>
+            <button onclick="switchTab('settings')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50" data-target="settings">
+                <i class="fa-solid fa-gear w-5"></i>
+                <span>Settings & Reset</span>
+            </button>
+        </nav>
+
+        <!-- Disclaimer Footer -->
+        <div class="p-4 border-t border-cardborder text-xs text-gray-500 bg-darknavy/40">
+            <p><i class="fa-solid fa-circle-info text-electricblue mr-1"></i> Virtual money only. Educational practice tool, not real trading.</p>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+        
+        <!-- Top Navigation Bar -->
+        <header class="hidden md:flex items-center justify-between px-8 py-4 bg-carddark/80 backdrop-blur-md border-b border-cardborder sticky top-0 z-30">
+            <div class="flex items-center space-x-4">
+                <h2 id="page-title" class="text-xl font-bold text-white tracking-tight">Student Dashboard</h2>
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-electricblue/10 text-electricblue border border-electricblue/20">Virtual Education Mode</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 bg-darknavy px-3 py-1.5 rounded-xl border border-cardborder">
+                    <i class="fa-solid fa-fire text-amber-500"></i>
+                    <span class="text-sm font-bold text-white"><span id="top-streak">0</span> Day Streak</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-darknavy px-3 py-1.5 rounded-xl border border-cardborder">
+                    <i class="fa-solid fa-wallet text-accentgreen"></i>
+                    <span class="text-sm font-bold text-accentgreen" id="top-balance">$10,000.00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Container -->
+        <div class="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="space-y-6 tab-content">
+                <!-- Welcome Banner -->
+                <div class="relative overflow-hidden bg-gradient-to-r from-carddark to-cardborder p-6 md:p-8 rounded-2xl border border-cardborder shadow-xl">
+                    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-electricblue/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-electricblue">Welcome back, trader</span>
+                            <h2 class="text-2xl md:text-3xl font-bold text-white mt-1">Ready to master day trading risk?</h2>
+                            <p class="text-gray-400 text-sm mt-2 max-w-xl">Learn essential risk management, calculate losses, analyze charts, and test your strategies with $10,000 in virtual capital risk-free.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="switchTab('lessons')" class="bg-electricblue hover:bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-electricblue/20 flex items-center space-x-2">
+                                <span id="continue-learning-text">Continue Learning</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <button onclick="switchTab('simulator')" class="bg-cardborder hover:bg-gray-800 text-white px-5 py-3 rounded-xl font-semibold text-sm transition-all border border-cardborder flex items-center space-x-2">
+                                <i class="fa-solid fa-laptop-code text-accentgreen"></i>
+                                <span>Open Simulator</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Learning Level</span>
+                            <div class="w-8 h-8 rounded-lg bg-electricblue/10 text-electricblue flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <h3 class="text-2xl font-bold text-white" id="dash-level">Level 1</h3>
+                            <span class="text-xs text-electricblue font-medium" id="dash-level-title">Trading Basics</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Lessons Completed</span>
+                            <div class="w-8 h-8 rounded-lg bg-accentgreen/10 text-accentgreen flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <h3 class="text-2xl font-bold text-white"><span id="dash-completed-lessons">0</span><span class="text-sm text-gray-500 font-normal">/ 25</span></h3>
+                            <span class="text-xs text-accentgreen font-medium" id="dash-lesson-pct">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Quiz Score Avg</span>
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-percent"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <h3 class="text-2xl font-bold text-white" id="dash-quiz-avg">0%</h3>
+                            <span class="text-xs text-gray-400" id="dash-quizzes-taken">0 quizzes taken</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Practice Streak</span>
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <h3 class="text-2xl font-bold text-white"><span id="dash-streak">1</span> <span class="text-sm font-normal text-gray-400">days</span></h3>
+                            <span class="text-xs text-purple-400 font-medium">Active today</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Progress Bar & Daily Question Card -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Course Progression -->
+                    <div class="md:col-span-2 bg-carddark p-6 rounded-2xl border border-cardborder flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-lg text-white flex items-center space-x-2">
+                                    <i class="fa-solid fa-route text-electricblue"></i>
+                                    <span>Curriculum Progress</span>
+                                </h3>
+                                <span class="text-sm font-semibold text-electricblue" id="course-progress-text">0% Complete</span>
+                            </div>
+                            <div class="w-full bg-darknavy rounded-full h-3 mb-6 overflow-hidden border border-cardborder">
+                                <div id="course-progress-bar" class="bg-gradient-to-r from-electricblue to-cyan-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div class="space-y-3">
+                                <div onclick="openLevel(1)" class="cursor-pointer p-3 rounded-xl bg-darknavy/50 border border-cardborder hover:border-electricblue/50 transition-all flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-electricblue/20 text-electricblue flex items-center justify-center font-bold text-sm">1</div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-white">Level 1 — Trading Basics</h4>
+                                            <p class="text-xs text-gray-400">Stocks, shares, buy/sell prices, and profit/loss</p>
+                                        </div>
+                                    </div>
+                                    <span id="level-1-status" class="text-xs px-2.5 py-1 rounded-full bg-electricblue/20 text-electricblue font-medium">Active</span>
+                                </div>
+                                <div onclick="openLevel(2)" class="cursor-pointer p-3 rounded-xl bg-darknavy/50 border border-cardborder hover:border-electricblue/50 transition-all flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-gray-800 text-gray-400 flex items-center justify-center font-bold text-sm" id="lvl-2-icon">2</div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-white">Level 2 — Risk Management</h4>
+                                            <p class="text-xs text-gray-400">Stop-losses, planned vs actual loss, and unrealized profit</p>
+                                        </div>
+                                    </div>
+                                    <span id="level-2-status" class="text-xs px-2.5 py-1 rounded-full bg-gray-800 text-gray-400 font-medium"><i class="fa-solid fa-lock mr-1"></i> Locked</span>
+                                </div>
+                                <div onclick="openLevel(3)" class="cursor-pointer p-3 rounded-xl bg-darknavy/50 border border-cardborder hover:border-electricblue/50 transition-all flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-lg bg-gray-800 text-gray-400 flex items-center justify-center font-bold text-sm" id="lvl-3-icon">3</div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-white">Level 3 — Trading Calculations</h4>
+                                            <p class="text-xs text-gray-400">Risk-to-reward ratios, share sizing, and fees</p>
+                                        </div>
+                                    </div>
+                                    <span id="level-3-status" class="text-xs px-2.5 py-1 rounded-full bg-gray-800 text-gray-400 font-medium"><i class="fa-solid fa-lock mr-1"></i> Locked</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('lessons')" class="mt-6 text-xs text-electricblue font-semibold hover:underline flex items-center space-x-1">
+                            <span>View all 5 levels & lessons</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Daily Practice Question Widget -->
+                    <div class="bg-carddark p-6 rounded-2xl border border-cardborder flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-bolt mr-1"></i> Daily Challenge</span>
+                                <span class="text-xs text-gray-400">Practice #1</span>
+                            </div>
+                            <h4 class="font-bold text-white text-base mb-3" id="daily-q-text">You buy 3 virtual shares at $15 each and plan to exit at $13. What is your planned loss?</h4>
+                            
+                            <div id="daily-options" class="space-y-2 mt-4">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <div id="daily-feedback" class="mt-4 p-3 rounded-xl text-xs hidden"></div>
+                        </div>
+                        <button id="daily-submit-btn" onclick="submitDailyQuiz()" class="mt-4 w-full bg-electricblue hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors shadow-md shadow-electricblue/20">
+                            Submit Answer
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: LEARNING LESSONS -->
+            <section id="tab-lessons" class="space-y-6 tab-content hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Learning Academy Curriculum</h2>
+                        <p class="text-gray-400 text-sm mt-1">Master day trading concepts step-by-step. Pass level assessments to unlock advanced topics.</p>
+                    </div>
+                    <!-- Level Selector Tabs -->
+                    <div class="flex flex-wrap gap-2" id="level-tabs">
+                        <button onclick="selectLevel(1)" class="level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-electricblue text-white shadow-md shadow-electricblue/20" data-level="1">Level 1</button>
+                        <button onclick="selectLevel(2)" class="level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-carddark text-gray-400 border border-cardborder" data-level="2">Level 2</button>
+                        <button onclick="selectLevel(3)" class="level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-carddark text-gray-400 border border-cardborder" data-level="3">Level 3</button>
+                        <button onclick="selectLevel(4)" class="level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-carddark text-gray-400 border border-cardborder" data-level="4">Level 4</button>
+                        <button onclick="selectLevel(5)" class="level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-carddark text-gray-400 border border-cardborder" data-level="5">Level 5</button>
+                    </div>
+                </div>
+
+                <!-- Lesson Content Area -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Lesson Navigation / List -->
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-cardborder">
+                            <h3 id="current-level-heading" class="font-bold text-white text-base">Level 1 — Trading Basics</h3>
+                            <span id="level-lock-badge" class="text-xs px-2 py-0.5 rounded-full bg-electricblue/20 text-electricblue font-medium">Unlocked</span>
+                        </div>
+                        <div id="lesson-list" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="pt-4 border-t border-cardborder">
+                            <button id="take-assessment-btn" onclick="startLevelAssessment()" class="w-full bg-accentgreen hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors shadow-lg shadow-accentgreen/20 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-clipboard-question"></i>
+                                <span id="assessment-btn-text">Take Level 1 Assessment</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Lesson Reader -->
+                    <div class="lg:col-span-2 bg-carddark p-6 md:p-8 rounded-2xl border border-cardborder flex flex-col justify-between">
+                        <div id="lesson-reader" class="space-y-6">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="flex items-center justify-between pt-6 mt-6 border-t border-cardborder">
+                            <button onclick="prevLesson()" id="prev-lesson-btn" class="bg-cardborder hover:bg-gray-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold border border-cardborder transition-colors">
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+                            </button>
+                            <span id="lesson-counter-text" class="text-xs text-gray-400 font-medium">Lesson 1 of 5</span>
+                            <button onclick="nextLesson()" id="next-lesson-btn" class="bg-electricblue hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-md shadow-electricblue/20">
+                                Next Lesson <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: VIRTUAL TRADING SIMULATOR -->
+            <section id="tab-simulator" class="space-y-6 tab-content hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Virtual Trading Simulator</h2>
+                        <p class="text-gray-400 text-sm mt-1">Practice executing trades with $10,000 in virtual funds. Real-time simulated price movements and risk controls.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="resetSimulator()" class="bg-cardborder hover:bg-gray-800 text-gray-300 hover:text-white px-4 py-2 rounded-xl text-xs font-semibold border border-cardborder transition-colors flex items-center space-x-2">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Reset Simulator</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulator Top Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Virtual Cash Balance</span>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="sim-cash">$10,000.00</h3>
+                    </div>
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Portfolio Market Value</span>
+                        <h3 class="text-2xl font-bold text-white mt-2" id="sim-portfolio-value">$0.00</h3>
+                    </div>
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Net Worth</span>
+                        <h3 class="text-2xl font-bold text-accentgreen mt-2" id="sim-net-worth">$10,000.00</h3>
+                    </div>
+                    <div class="bg-carddark p-5 rounded-2xl border border-cardborder">
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Simulated P&L</span>
+                        <h3 class="text-2xl font-bold text-accentgreen mt-2" id="sim-total-pnl">+$0.00 (0.00%)</h3>
+                    </div>
+                </div>
+
+                <!-- Main Simulator Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Stock Selector & Price Chart -->
+                    <div class="lg:col-span-2 bg-carddark p-6 rounded-2xl border border-cardborder flex flex-col space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <!-- Stock selector buttons -->
+                            <div class="flex items-center space-x-2" id="stock-selector-buttons">
+                                <button onclick="selectStock('TSLA')" class="stock-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-electricblue text-white shadow-md shadow-electricblue/20" data-ticker="TSLA">TSLA ($245.50)</button>
+                                <button onclick="selectStock('AAPL')" class="stock-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-darknavy text-gray-400 border border-cardborder" data-ticker="AAPL">AAPL ($182.20)</button>
+                                <button onclick="selectStock('NVDA')" class="stock-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-darknavy text-gray-400 border border-cardborder" data-ticker="NVDA">NVDA ($875.40)</button>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-400">Current Price</span>
+                                <div class="text-xl font-bold text-white" id="active-stock-price">$245.50</div>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Chart Container -->
+                        <div class="relative w-full h-72 bg-darknavy/50 rounded-xl border border-cardborder p-2">
+                            <canvas id="tradingChart"></canvas>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-gray-400 px-1">
+                            <span><i class="fa-solid fa-circle text-accentgreen text-[8px] mr-1"></i> Live Educational Price Feed (Updates every 3s)</span>
+                            <span>Simulated Volatility Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Order Ticket -->
+                    <div class="bg-carddark p-6 rounded-2xl border border-cardborder flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-cardborder pb-3">
+                                <h3 class="font-bold text-white text-base">Order Ticket</h3>
+                                <span class="text-xs font-semibold text-electricblue" id="order-ticker-label">TSLA</span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-400 mb-1">Number of Shares</label>
+                                    <input type="number" id="order-shares" value="10" min="1" max="1000" oninput="calculateOrderTotal()" class="w-full bg-darknavy border border-cardborder rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-electricblue">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-400 mb-1">Planned Stop-Loss Price ($)</label>
+                                    <input type="number" id="order-stoploss" value="235.00" step="0.1" class="w-full bg-darknavy border border-cardborder rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-electricblue">
+                                    <span class="text-[10px] text-gray-500 mt-1 block">Protects your position if price drops</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-darknavy border border-cardborder space-y-1.5 text-xs">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Estimated Cost:</span>
+                                        <span class="font-bold text-white" id="order-est-cost">$2,455.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Max Planned Risk:</span>
+                                        <span class="font-bold text-accentred" id="order-max-risk">$105.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-4">
+                            <button onclick="executeBuyOrder()" class="w-full bg-accentgreen hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors shadow-lg shadow-accentgreen/20 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                <span>Buy Virtual Shares</span>
+                            </button>
+                            <p class="text-[10px] text-center text-gray-500">Educational simulator. No real money or brokerage involved.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Holdings & Trade History Tables -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Active Holdings -->
+                    <div class="bg-carddark p-6 rounded-2xl border border-cardborder space-y-4">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i class="fa-solid fa-briefcase text-electricblue"></i>
+                            <span>Active Holdings</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-cardborder text-gray-400">
+                                        <th class="py-2 px-3">Ticker</th>
+                                        <th class="py-2 px-3">Shares</th>
+                                        <th class="py-2 px-3">Entry</th>
+                                        <th class="py-2 px-3">Current</th>
+                                        <th class="py-2 px-3">P&L</th>
+                                        <th class="py-2 px-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="holdings-table-body">
+                                    <tr>
+                                        <td colspan="6" class="py-6 text-center text-gray-500">No active positions. Buy shares above to start trading.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Trade History -->
+                    <div class="bg-carddark p-6 rounded-2xl border border-cardborder space-y-4">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i class="fa-solid fa-clock-rotate-left text-electricblue"></i>
+                            <span>Trade History</span>
+                        </h3>
+                        <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-cardborder text-gray-400 sticky top-0 bg-carddark">
+                                        <th class="py-2 px-3">Ticker</th>
+                                        <th class="py-2 px-3">Type</th>
+                                        <th class="py-2 px-3">Shares</th>
+                                        <th class="py-2 px-3">Entry</th>
+                                        <th class="py-2 px-3">Exit</th>
+                                        <th class="py-2 px-3 text-right">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <tr>
+                                        <td colspan="6" class="py-6 text-center text-gray-500">No completed trades yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: RISK CALCULATOR -->
+            <section id="tab-calculator" class="space-y-6 tab-content hidden">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Day Trading Risk Calculator</h2>
+                        <p class="text-gray-400 text-sm mt-1">Calculate your exact potential loss, total purchase cost, and percentage risk before placing any trade.</p>
+                    </div>
+
+                    <div class="bg-carddark p-6 md:p-8 rounded-2xl border border-cardborder grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Buy Price ($)</label>
+                                <input type="number" id="calc-buy" value="15.00" step="0.01" oninput="calculateRisk()" class="w-full bg-darknavy border border-cardborder rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-electricblue">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Planned Exit Price ($)</label>
+                                <input type="number" id="calc-exit" value="13.00" step="0.01" oninput="calculateRisk()" class="w-full bg-darknavy border border-cardborder rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-electricblue">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Number of Shares</label>
+                                <input type="number" id="calc-shares" value="3" min="1" oninput="calculateRisk()" class="w-full bg-darknavy border border-cardborder rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-electricblue">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Estimated Fees ($ optional)</label>
+                                <input type="number" id="calc-fees" value="0.00" step="0.01" oninput="calculateRisk()" class="w-full bg-darknavy border border-cardborder rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-electricblue">
+                            </div>
+                        </div>
+
+                        <!-- Results Card -->
+                        <div class="bg-darknavy p-6 rounded-xl border border-cardborder flex flex-col justify-between space-y-4">
+                            <h3 class="font-bold text-white text-base border-b border-cardborder pb-3">Risk & Cost Breakdown</h3>
+                            
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Loss Per Share:</span>
+                                    <span class="font-bold text-white" id="res-loss-share">$2.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Total Planned Loss:</span>
+                                    <span class="font-bold text-accentred" id="res-total-loss">$6.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Total Purchase Cost:</span>
+                                    <span class="font-bold text-white" id="res-total-cost">$45.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Percentage Price Change:</span>
+                                    <span class="font-bold text-amber-500" id="res-pct-change">-13.33%</span>
+                                </div>
+                                <div class="flex justify-between border-t border-cardborder pt-3">
+                                    <span class="text-gray-400 font-semibold">Total Cost + Fees:</span>
+                                    <span class="font-bold text-white" id="res-with-fees">$45.00</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-carddark rounded-lg text-xs text-gray-400">
+                                <p><i class="fa-solid fa-circle-info text-electricblue mr-1"></i> Formula: <code class="text-white">Planned Loss = (Buy Price − Exit Price) × Shares</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: PRACTICE CHALLENGES -->
+            <section id="tab-challenges" class="space-y-6 tab-content hidden">
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Practice Challenges</h2>
+                            <p class="text-gray-400 text-sm mt-1">Test your strategic thinking before making pretend trades in the simulator.</p>
+                        </div>
+                        <button onclick="loadNewChallenge()" class="bg-electricblue hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md shadow-electricblue/20 transition-all">
+                            Next Challenge <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+
+                    <div id="challenge-card" class="bg-carddark p-6 md:p-8 rounded-2xl border border-cardborder space-y-6">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: MY MISTAKES -->
+            <section id="tab-mistakes" class="space-y-6 tab-content hidden">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">My Mistakes Review</h2>
+                        <p class="text-gray-400 text-sm mt-1">Review questions you answered incorrectly, understand the correct methodology, and retry them to master the concepts.</p>
+                    </div>
+
+                    <div id="mistakes-container" class="space-y-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: ACHIEVEMENTS -->
+            <section id="tab-achievements" class="space-y-6 tab-content hidden">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Student Achievements & Badges</h2>
+                        <p class="text-gray-400 text-sm mt-1">Earn badges as you complete lessons, pass assessments, and master risk management calculations.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="achievements-grid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 8: SETTINGS & RESET -->
+            <section id="tab-settings" class="space-y-6 tab-content hidden">
+                <div class="max-w-2xl mx-auto space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Platform Settings & Reset</h2>
+                        <p class="text-gray-400 text-sm mt-1">Manage your student profile, view data persistence status, or restart your trading practice journey.</p>
+                    </div>
+
+                    <div class="bg-carddark p-6 md:p-8 rounded-2xl border border-cardborder space-y-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Student Name</label>
+                            <div class="flex space-x-3">
+                                <input type="text" id="settings-name-input" class="flex-1 bg-darknavy border border-cardborder rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-electricblue" value="Student Trader">
+                                <button onclick="updateStudentName()" class="bg-electricblue hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">Save</button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-cardborder pt-6 space-y-4">
+                            <h3 class="font-bold text-white text-base">Data Persistence</h3>
+                            <p class="text-xs text-gray-400">All progress, quiz scores, simulator balances, and unlocked levels are automatically saved to your browser's <code class="text-white">localStorage</code>.</p>
+                            <div class="p-4 bg-darknavy rounded-xl border border-cardborder flex items-center justify-between text-xs">
+                                <span class="text-gray-300">Status: <strong class="text-accentgreen">Active & Saving</strong></span>
+                                <button onclick="exportUserData()" class="text-electricblue hover:underline font-semibold">Export Backup JSON</button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-cardborder pt-6 space-y-4">
+                            <h3 class="font-bold text-accentred text-base">Danger Zone</h3>
+                            <p class="text-xs text-gray-400">Resetting your practice progress will reset your virtual balance to $10,000, lock all levels above Level 1, and clear all quiz scores.</p>
+                            <button onclick="confirmResetAllData()" class="bg-accentred/20 hover:bg-accentred text-accentred hover:text-white border border-accentred/40 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all">
+                                <i class="fa-solid fa-triangle-exclamation mr-2"></i> Reset All Practice Progress
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Quiz Modal / Assessment Overlay -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-carddark border border-cardborder rounded-2xl max-w-xl w-full p-6 md:p-8 space-y-6 shadow-2xl relative">
+            <button onclick="closeQuizModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="flex items-center justify-between">
+                <span id="quiz-modal-category" class="text-xs font-bold uppercase tracking-wider text-electricblue bg-electricblue/10 px-3 py-1 rounded-full">Level 1 Assessment</span>
+                <span id="quiz-modal-progress" class="text-xs font-semibold text-gray-400">Question 1 of 5</span>
+            </div>
+            
+            <div class="space-y-4">
+                <h3 id="quiz-modal-question" class="text-lg md:text-xl font-bold text-white">Question text goes here?</h3>
+                <div id="quiz-modal-options" class="space-y-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div id="quiz-modal-feedback" class="p-4 rounded-xl text-xs hidden"></div>
+
+            <div class="flex justify-end pt-4 border-t border-cardborder">
+                <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="bg-electricblue hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-colors hidden shadow-lg shadow-electricblue/20">
+                    Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        /* ==========================================
+           1. APPLICATION STATE & LOCALSTORAGE DATA
+           ========================================== */
+        const STORAGE_KEY = 'trading_academy_state_v1';
+
+        let defaultState = {
+            studentName: 'Student Trader',
+            level: 1,
+            completedLessons: [],
+            quizScores: {}, // levelId -> { total, correct, passed }
+            mistakes: [], // array of incorrect question objects
+            achievements: {
+                first_lesson: false,
+                risk_beginner: false,
+                quiz_master: false,
+                calc_expert: false,
+                practice_champ: false
+            },
+            simulator: {
+                cash: 10000.00,
+                holdings: [], // { ticker, shares, entryPrice, stopLoss }
+                history: []   // { ticker, type, shares, entryPrice, exitPrice, pnl }
+            },
+            streak: 1,
+            lastLoginDate: new Date().toDateString()
+        };
+
+        let appState = loadState();
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    let parsed = JSON.parse(saved);
+                    // Check streak
+                    let today = new Date().toDateString();
+                    if (parsed.lastLoginDate !== today) {
+                        parsed.streak = (parsed.streak || 1) + 1;
+                        parsed.lastLoginDate = today;
+                    }
+                    return { ...defaultState, ...parsed };
+                }
+            } catch (e) {
+                console.error("Error loading state", e);
+            }
+            return defaultState;
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                updateUI();
+            } catch (e) {
+                console.error("Error saving state", e);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bgClass = type === 'success' ? 'bg-accentgreen text-white' : type === 'error' ? 'bg-accentred text-white' : 'bg-electricblue text-white';
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-xl text-sm font-semibold flex items-center space-x-2 pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300`;
+            
+            let icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        /* ==========================================
+           2. NAVIGATION & TABS
+           ========================================== */
+        const tabs = ['dashboard', 'lessons', 'simulator', 'calculator', 'challenges', 'mistakes', 'achievements', 'settings'];
+
+        function switchTab(tabId) {
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+            });
+            const targetEl = document.getElementById(`tab-${tabId}`);
+            if (targetEl) targetEl.classList.remove('hidden');
+
+            // Update sidebar nav active styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-target') === tabId) {
+                    btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors bg-electricblue text-white shadow-lg shadow-electricblue/20";
+                } else {
+                    btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors text-gray-400 hover:text-white hover:bg-cardborder/50";
+                }
+            });
+
+            // Update page title
+            const titles = {
+                dashboard: 'Student Dashboard',
+                lessons: 'Learning Lessons & Curriculum',
+                simulator: 'Virtual Trading Simulator',
+                calculator: 'Day Trading Risk Calculator',
+                challenges: 'Practice Challenges',
+                mistakes: 'My Mistakes Review',
+                achievements: 'Student Achievements',
+                settings: 'Platform Settings'
+            };
+            document.getElementById('page-title').innerText = titles[tabId] || 'Trading Academy';
+
+            // Close mobile menu if open
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+
+            // Trigger specific tab init
+            if (tabId === 'simulator') initChart();
+            if (tabId === 'mistakes') renderMistakes();
+            if (tabId === 'achievements') renderAchievements();
+            if (tabId === 'challenges') loadNewChallenge();
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.remove('hidden');
+        });
+        document.getElementById('sidebar-overlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.add('hidden');
+        });
+
+        /* ==========================================
+           3. CURRICULUM & LESSONS DATA
+           ========================================== */
+        const curriculum = {
+            1: {
+                title: "Level 1 — Trading Basics",
+                lessons: [
+                    {
+                        title: "What is a stock?",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Understanding Stocks</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">A stock (also known as equity) represents a fractional ownership share in a corporation. When you buy a stock, you become a shareholder of that company.</p>
+                            <div class="p-4 bg-darknavy rounded-xl border border-cardborder space-y-2 mb-4">
+                                <h4 class="font-semibold text-white text-sm"><i class="fa-solid fa-lightbulb text-electricblue mr-2"></i>Key Concept for Day Traders</h4>
+                                <p class="text-xs text-gray-400">Day traders don't buy stocks to hold for years. They buy and sell stocks within the same trading day to profit from short-term price fluctuations.</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "What is a share?",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">What is a Share?</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">A share is the single unit of ownership in a company. If Apple has 10 billion shares outstanding and you own 100 shares, you own a tiny fractional slice of Apple.</p>
+                            <p class="text-gray-300 text-sm leading-relaxed">In day trading, your position size is measured in <strong>number of shares</strong>. Buying more shares magnifies both your potential profits and potential losses.</p>
+                        `
+                    },
+                    {
+                        title: "What is day trading?",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Day Trading Fundamentals</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Day trading is the act of buying and selling financial instruments (like stocks) within the same trading day. All positions are closed before the closing bell rings—no positions are held overnight.</p>
+                            <div class="p-4 bg-darknavy rounded-xl border border-cardborder space-y-2">
+                                <h4 class="font-semibold text-white text-sm">Core Rule</h4>
+                                <p class="text-xs text-gray-400">Discipline and strict risk management separate successful day traders from gamblers.</p>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "Buy price and selling price",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Buy Price vs. Selling Price</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Every trade has two vital price points:</p>
+                            <ul class="list-disc list-inside space-y-2 text-sm text-gray-300 mb-4">
+                                <li><strong>Buy Price (Entry):</strong> The price at which you purchase shares to open a position.</li>
+                                <li><strong>Selling Price (Exit):</strong> The price at which you sell your shares to close the position.</li>
+                            </ul>
+                        `
+                    },
+                    {
+                        title: "Profit and loss (P&L)",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Calculating Profit and Loss</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Profit or Loss (P&L) is determined by the difference between your buying price and selling price multiplied by the number of shares.</p>
+                            <div class="p-4 bg-darknavy rounded-xl border border-cardborder space-y-2">
+                                <p class="text-xs text-white font-mono">Profit per Share = Selling Price − Buy Price</p>
+                                <p class="text-xs text-white font-mono">Total Profit = Profit per Share × Number of Shares</p>
+                            </div>
+                        `
+                    }
+                ],
+                assessment: [
+                    {
+                        question: "What does owning a share of stock represent?",
+                        options: ["A loan to the government", "Fractional ownership in a corporation", "A guaranteed monthly dividend", "Insurance against market crashes"],
+                        correct: 1,
+                        explanation: "A share represents a fractional ownership share in a corporation."
+                    },
+                    {
+                        question: "What is the defining characteristic of day trading?",
+                        options: ["Holding stocks for 10+ years", "Buying and selling within the same trading day with no overnight holds", "Trading only cryptocurrency", "Investing exclusively in mutual funds"],
+                        correct: 1,
+                        explanation: "Day trading involves entering and exiting positions within the same trading day."
+                    },
+                    {
+                        question: "If you buy 10 shares at $20 and sell them at $25, what is your total profit?",
+                        options: ["$20", "$50", "$250", "$500"],
+                        correct: 1,
+                        explanation: "($25 − $20) = $5 profit per share. $5 × 10 shares = $50 total profit."
+                    },
+                    {
+                        question: "What is your entry price called?",
+                        options: ["The liquidation fee", "The buy price", "The dividend yield", "The market cap"],
+                        correct: 1,
+                        explanation: "The price at which you purchase shares to open a position is your buy price (entry)."
+                    },
+                    {
+                        question: "Why do day traders close all positions before the market closes?",
+                        options: ["To avoid overnight gap risk", "Because brokers force them to", "To pay lower taxes", "It is required by SEC law for beginners"],
+                        correct: 0,
+                        explanation: "Closing before market close avoids unpredictable overnight news gaps."
+                    }
+                ]
+            },
+            2: {
+                title: "Level 2 — Risk Management",
+                lessons: [
+                    {
+                        title: "What is a stop-loss?",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Stop-Loss Orders</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">A stop-loss is an order placed with your broker to sell a security automatically when it reaches a specific price. It is your primary safety net against catastrophic losses.</p>
+                        `
+                    },
+                    {
+                        title: "Planned loss versus actual loss",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Planned vs. Actual Loss</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Before entering a trade, professional traders calculate their <strong>planned loss</strong> based on their stop-loss price. <strong>Actual loss</strong> can sometimes differ due to rapid market slippage.</p>
+                        `
+                    },
+                    {
+                        title: "Calculating loss per share",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Loss Per Share Calculation</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Loss per share = Buy Price − Planned Exit Price.</p>
+                        `
+                    },
+                    {
+                        title: "Calculating total loss using shares",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Total Loss Calculation</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">Total Loss = Loss per Share × Number of Shares. For example, buying 3 shares at $15 with a stop-loss at $13 gives a planned loss of $2 × 3 = $6.</p>
+                        `
+                    },
+                    {
+                        title: "Why stop-losses don't guarantee exact prices",
+                        content: `
+                            <h3 class="text-xl font-bold text-white mb-3">Slippage & Stop-Loss Limits</h3>
+                            <p class="text-gray-300 text-sm leading-relaxed mb-4">During extreme volatility or market gaps, a stop-loss order triggers a market sell order, which may execute at a lower price than requested. This is known as <strong>slippage</strong>.</p>
+                        `
+                    }
+                ],
+                assessment: [
+                    {
+                        question: "You buy 3 virtual shares at $15 each and plan to exit at $13 per share. What is your total planned loss?",
+                        options: ["$2", "$6", "$13", "$45"],
+                        correct: 1,
+                        explanation: "$15 − $13 = $2 per share, and $2 × 3 shares = $6 planned loss."
+                    },
+                    {
+                        question: "What is the main purpose of a stop-loss order?",
+                        options: ["To guarantee maximum profits", "To automatically limit potential financial losses", "To eliminate brokerage fees", "To borrow money from the broker"],
+                        correct: 1,
+                        explanation: "A stop-loss automatically triggers a sale to limit losses if the stock drops."
+                    },
+                    {
+                        question: "What is 'slippage' in day trading?",
+                        options: ["Dropping your smartphone while trading", "When a stop-loss executes at a worse price than planned due to market volatility", "A discount on brokerage commissions", "Accidentally buying the wrong stock"],
+                        correct: 1,
+                        explanation: "Slippage occurs when fast-moving prices cause an order to execute at a price worse than requested."
+                    },
+                    {
+                        question: "If you buy 10 shares at $50 with a stop-loss at $48, what is your planned loss?",
+                        options: ["$2", "$20", "$480", "$500"],
+                        correct: 1,
+                        explanation: "($50 − $48) = $2 loss per share. $2 × 10 shares = $20 total planned loss."
+                    },
+                    {
+                        question: "True or False: A stop-loss guarantees you will exit at your exact trigger price.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        explanation: "False. In fast markets or gapping stocks, execution can happen below your stop price (slippage)."
+                    }
+                ]
+            },
+            3: {
+                title: "Level 3 — Trading Calculations",
+                lessons: [
+                    {
+                        title: "Calculating potential profit",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Potential Profit</h3><p class="text-gray-300 text-sm">Potential Profit = (Target Exit Price − Buy Price) × Number of Shares.</p>`
+                    },
+                    {
+                        title: "Calculating potential loss",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Potential Loss</h3><p class="text-gray-300 text-sm">Potential Loss = (Buy Price − Stop Loss Price) × Number of Shares.</p>`
+                    },
+                    {
+                        title: "Understanding risk-to-reward ratios",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Risk-to-Reward Ratio</h3><p class="text-gray-300 text-sm">Risk-to-Reward compares how much money you risk making vs. losing. A 1:3 ratio means you risk $1 to make $3.</p>`
+                    },
+                    {
+                        title: "How number of shares changes results",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Position Sizing</h3><p class="text-gray-300 text-sm">Scaling up your share count scales your dollar risk linearly. Always calculate risk per share first.</p>`
+                    },
+                    {
+                        title: "Accounting for fees in calculations",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Accounting for Fees</h3><p class="text-gray-300 text-sm">Commissions and platform fees reduce your net profit or increase your net loss.</p>`
+                    }
+                ],
+                assessment: [
+                    {
+                        question: "You risk $50 to make $150 on a trade. What is your risk-to-reward ratio?",
+                        options: ["1:1", "1:2", "1:3", "3:1"],
+                        correct: 2,
+                        explanation: "$50 risk to $150 reward simplifies to a 1:3 risk-to-reward ratio."
+                    },
+                    {
+                        question: "If your target profit is $3 per share and you buy 20 shares, what is your potential profit?",
+                        options: ["$23", "$60", "$200", "$3"],
+                        correct: 1,
+                        explanation: "$3 profit per share × 20 shares = $60 potential profit."
+                    },
+                    {
+                        question: "Why should you factor platform fees into your calculations?",
+                        options: ["Fees increase your gross profit", "Fees directly eat into your net returns", "Fees are optional donations", "Fees prevent slippage"],
+                        correct: 1,
+                        explanation: "Brokerage fees reduce net profits and add to total trade costs."
+                    },
+                    {
+                        question: "If you buy 50 shares at $10 and set a stop loss at $9, what is your total dollar risk?",
+                        options: ["$10", "$50", "$450", "$500"],
+                        correct: 1,
+                        explanation: "($10 − $9) = $1 risk per share. $1 × 50 shares = $50 total risk."
+                    },
+                    {
+                        question: "What does a favorable risk-to-reward ratio mean for day traders?",
+                        options: ["Potential reward outweighs planned risk", "Risk is higher than reward", "No losses can occur", "Taxes are eliminated"],
+                        correct: 0,
+                        explanation: "A favorable setup offers higher potential reward relative to the risk taken."
+                    }
+                ]
+            },
+            4: {
+                title: "Level 4 — Charts and Market Basics",
+                lessons: [
+                    {
+                        title: "Candlestick charts",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Candlestick Charts</h3><p class="text-gray-300 text-sm">Candlesticks visually display price action over specific timeframes, showing Open, High, Low, and Close (OHLC).</p>`
+                    },
+                    {
+                        title: "Green and red candles",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Green vs Red Candles</h3><p class="text-gray-300 text-sm">Green (bullish) candles mean price closed higher than it opened. Red (bearish) candles mean price closed lower.</p>`
+                    },
+                    {
+                        title: "Price movements and momentum",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Momentum</h3><p class="text-gray-300 text-sm">Momentum reflects the speed and strength of price directional movement.</p>`
+                    },
+                    {
+                        title: "Support and resistance",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Support & Resistance</h3><p class="text-gray-300 text-sm">Support is a price floor where buying pressure overcomes selling. Resistance is a price ceiling where selling pressure overcomes buying.</p>`
+                    },
+                    {
+                        title: "Volume",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Trading Volume</h3><p class="text-gray-300 text-sm">Volume measures the total number of shares traded during a given timeframe. High volume validates price moves.</p>`
+                    }
+                ],
+                assessment: [
+                    {
+                        question: "What does a green candlestick indicate?",
+                        options: ["Price closed lower than it opened", "Price closed higher than it opened", "Trading volume was zero", "The market is closed"],
+                        correct: 1,
+                        explanation: "Green candles indicate bullish price action where the close is higher than the open."
+                    },
+                    {
+                        question: "What is 'support' in chart analysis?",
+                        options: ["A price ceiling where sellers dominate", "A price floor where buying pressure tends to emerge", "Customer service for brokers", "The total company debt"],
+                        correct: 1,
+                        explanation: "Support acts as a price floor where buyers step in to prevent further decline."
+                    },
+                    {
+                        question: "Why is trading volume important?",
+                        options: ["It confirms the strength and conviction behind price movements", "It determines your tax bracket", "It calculates broker commissions", "It eliminates all risk"],
+                        correct: 0,
+                        explanation: "High volume confirms that significant market participation supports the price move."
+                    },
+                    {
+                        question: "What four data points does a standard candlestick show?",
+                        options: ["Open, High, Low, Close", "Bid, Ask, Spread, Volume", "Revenue, Profit, Debt, Asset", "Date, Time, Trader, Broker"],
+                        correct: 0,
+                        explanation: "Candlesticks display Open, High, Low, and Close prices for the period."
+                    },
+                    {
+                        question: "What does 'resistance' represent on a chart?",
+                        options: ["A price ceiling where selling pressure overcomes buying", "A floor where buyers accumulate", "An electric charge in servers", "A guaranteed profit level"],
+                        correct: 0,
+                        explanation: "Resistance is a price level where sellers frequently overwhelm buyers."
+                    }
+                ]
+            },
+            5: {
+                title: "Level 5 — Practice and Review",
+                lessons: [
+                    {
+                        title: "Virtual trading scenarios",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Virtual Scenarios</h3><p class="text-gray-300 text-sm">Apply everything you've learned in simulated live markets with zero financial risk.</p>`
+                    },
+                    {
+                        title: "Risk-management challenges",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Risk Challenges</h3><p class="text-gray-300 text-sm">Always define your stop loss and risk-to-reward ratio before clicking buy.</p>`
+                    },
+                    {
+                        title: "Mixed quizzes & mastery review",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Mastery Review</h3><p class="text-gray-300 text-sm">Review previous mistakes and test your comprehensive day trading readiness.</p>`
+                    },
+                    {
+                        title: "Avoiding common beginner traps",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Avoiding Traps</h3><p class="text-gray-300 text-sm">Never revenge trade or ignore your stop-loss plan.</p>`
+                    },
+                    {
+                        title: "Final beginner assessment",
+                        content: `<h3 class="text-xl font-bold text-white mb-3">Final Assessment</h3><p class="text-gray-300 text-sm">Pass this final assessment to earn your Practice Champion badge!</p>`
+                    }
+                ],
+                assessment: [
+                    {
+                        question: "What is 'revenge trading'?",
+                        options: ["Suing your broker for losses", "Attempting to quickly win back losses by taking reckless, unplanned trades", "Trading only on weekends", "Reporting illegal market manipulation"],
+                        correct: 1,
+                        explanation: "Revenge trading is a dangerous emotional trap where traders take high-risk trades to recover losses."
+                    },
+                    {
+                        question: "You buy 100 shares at $50 with a stop-loss at $47. What is your planned risk?",
+                        options: ["$100", "$300", "$500", "$4,700"],
+                        correct: 1,
+                        explanation: "($50 − $47) = $3 risk per share × 100 shares = $300 planned risk."
+                    },
+                    {
+                        question: "Which of the following is best practice for day trading beginners?",
+                        options: ["Risking your entire savings account on one trade", "Using virtual money to practice strategies risk-free", "Ignoring stop-losses during high volatility", "Holding losing trades overnight"],
+                        correct: 1,
+                        explanation: "Practicing with virtual money allows beginners to build skills without real financial risk."
+                    },
+                    {
+                        question: "What should you do if a trade triggers your stop-loss?",
+                        options: ["Move the stop-loss lower and hope it bounces", "Accept the planned loss and exit the trade", "Blame the market maker", "Double your share size immediately"],
+                        correct: 1,
+                        explanation: "You must respect your stop-loss and exit to prevent minor losses from becoming catastrophic."
+                    },
+                    {
+                        question: "Are simulated trading results a guarantee of real-world profits?",
+                        options: ["Yes, absolutely", "No, simulated trading is for educational practice only"],
+                        correct: 1,
+                        explanation: "Simulated results do not guarantee real-world results due to emotional and live market factors."
+                    }
+                ]
+            }
+        };
+
+        let currentSelectedLevel = 1;
+        let currentLessonIndex = 0;
+
+        function selectLevel(levelId) {
+            if (levelId > appState.level && !appState.quizScores[levelId - 1]?.passed) {
+                showToast(`Complete Level ${levelId - 1} assessment first to unlock!`, 'error');
+                return;
+            }
+            currentSelectedLevel = levelId;
+            currentLessonIndex = 0;
+
+            document.querySelectorAll('.level-tab-btn').forEach(btn => {
+                let lvl = parseInt(btn.getAttribute('data-level'));
+                if (lvl === levelId) {
+                    btn.className = "level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-electricblue text-white shadow-md shadow-electricblue/20";
+                } else if (lvl <= appState.level || appState.quizScores[lvl - 1]?.passed) {
+                    btn.className = "level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-carddark text-white border border-cardborder hover:border-electricblue";
+                } else {
+                    btn.className = "level-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-darknavy text-gray-600 border border-cardborder opacity-60";
+                }
+            });
+
+            renderCurrentLesson();
+        }
+
+        function openLevel(levelId) {
+            switchTab('lessons');
+            selectLevel(levelId);
+        }
+
+        function renderCurrentLesson() {
+            const data = curriculum[currentSelectedLevel];
+            document.getElementById('current-level-heading').innerText = data.title;
+            
+            const isPassed = appState.quizScores[currentSelectedLevel]?.passed;
+            const badge = document.getElementById('level-lock-badge');
+            if (isPassed) {
+                badge.className = "text-xs px-2.5 py-1 rounded-full bg-accentgreen/20 text-accentgreen font-medium";
+                badge.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Passed`;
+            } else {
+                badge.className = "text-xs px-2.5 py-1 rounded-full bg-electricblue/20 text-electricblue font-medium";
+                badge.innerHTML = `Active`;
+            }
+
+            // Render lesson list
+            let listHtml = '';
+            data.lessons.forEach((l, idx) => {
+                let activeClass = idx === currentLessonIndex ? 'border-electricblue bg-electricblue/10 text-white' : 'border-cardborder bg-darknavy/40 text-gray-400 hover:text-white';
+                listHtml += `
+                    <div onclick="setLessonIndex(${idx})" class="cursor-pointer p-3 rounded-xl border ${activeClass} transition-all flex items-center justify-between text-xs font-medium">
+                        <span class="truncate">${idx + 1}. ${l.title}</span>
+                        ${appState.completedLessons.includes(`${currentSelectedLevel}-${idx}`) ? '<i class="fa-solid fa-check text-accentgreen"></i>' : ''}
+                    </div>
+                `;
+            });
+            document.getElementById('lesson-list').innerHTML = listHtml;
+
+            // Render lesson reader
+            const lesson = data.lessons[currentLessonIndex];
+            document.getElementById('lesson-reader').innerHTML = lesson.content;
+            document.getElementById('lesson-counter-text').innerText = `Lesson ${currentLessonIndex + 1} of ${data.lessons.length}`;
+
+            // Mark completed
+            let key = `${currentSelectedLevel}-${currentLessonIndex}`;
+            if (!appState.completedLessons.includes(key)) {
+                appState.completedLessons.push(key);
+                checkAchievements();
+                saveState();
+            }
+
+            document.getElementById('assessment-btn-text').innerText = `Take Level ${currentSelectedLevel} Assessment`;
+        }
+
+        function setLessonIndex(idx) {
+            currentLessonIndex = idx;
+            renderCurrentLesson();
+        }
+
+        function prevLesson() {
+            if (currentLessonIndex > 0) {
+                currentLessonIndex--;
+                renderCurrentLesson();
+            }
+        }
+
+        function nextLesson() {
+            const data = curriculum[currentSelectedLevel];
+            if (currentLessonIndex < data.lessons.length - 1) {
+                currentLessonIndex++;
+                renderCurrentLesson();
+            } else {
+                showToast("You've reached the end of this level! Take the assessment below.", 'info');
+            }
+        }
+
+        /* ==========================================
+           4. INTERACTIVE QUIZ & ASSESSMENT SYSTEM
+           ========================================== */
+        let activeQuizData = null;
+        let currentQuizIndex = 0;
+        let correctQuizCount = 0;
+        let isDailyQuiz = false;
+
+        function startLevelAssessment() {
+            activeQuizData = curriculum[currentSelectedLevel].assessment;
+            currentQuizIndex = 0;
+            correctQuizCount = 0;
+            isDailyQuiz = false;
+            document.getElementById('quiz-modal-category').innerText = `Level ${currentSelectedLevel} Assessment`;
+            document.getElementById('quiz-modal').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        function renderDailyQuizWidget() {
+            // Pick a random question from level 2 risk management
+            const q = curriculum[2].assessment[0]; // The 3 shares $15 to $13 question
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                let letter = String.fromCharCode(65 + idx);
+                html += `
+                    <button onclick="answerDailyQuiz(${idx}, ${q.correct})" class="daily-opt-btn w-full text-left px-3 py-2.5 rounded-xl text-xs bg-darknavy border border-cardborder hover:border-electricblue text-gray-300 hover:text-white transition-all flex items-center space-x-2">
+                        <span class="w-5 h-5 rounded-md bg-cardborder flex items-center justify-center font-bold text-electricblue">${letter}</span>
+                        <span>${opt}</span>
+                    </button>
+                `;
+            });
+            document.getElementById('daily-options').innerHTML = html;
+        }
+
+        function answerDailyQuiz(selectedIdx, correctIdx) {
+            const feedbackEl = document.getElementById('daily-feedback');
+            feedbackEl.classList.remove('hidden');
+            if (selectedIdx === correctIdx) {
+                feedbackEl.className = "mt-4 p-3 rounded-xl text-xs bg-accentgreen/20 text-accentgreen border border-accentgreen/30";
+                feedbackEl.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i> Correct! $15 − $13 = $2 per share, and $2 × 3 shares = $6 planned loss.`;
+                showToast("Daily challenge solved correctly!", "success");
+                appState.achievements.risk_beginner = true;
+                saveState();
+            } else {
+                feedbackEl.className = "mt-4 p-3 rounded-xl text-xs bg-accentred/20 text-accentred border border-accentred/30";
+                feedbackEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Incorrect. Correct answer is B ($6). $15 − $13 = $2 × 3 shares = $6.`;
+            }
+            document.getElementById('daily-submit-btn').classList.add('hidden');
+        }
+
+        function renderQuizQuestion() {
+            if (!activeQuizData || currentQuizIndex >= activeQuizData.length) {
+                finishQuizAssessment();
+                return;
+            }
+
+            const q = activeQuizData[currentQuizIndex];
+            document.getElementById('quiz-modal-progress').innerText = `Question ${currentQuizIndex + 1} of ${activeQuizData.length}`;
+            document.getElementById('quiz-modal-question').innerText = q.question;
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+            document.getElementById('quiz-modal-feedback').classList.add('hidden');
+
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                let letter = String.fromCharCode(65 + idx);
+                html += `
+                    <button onclick="handleQuizAnswer(${idx}, ${q.correct}, '${q.explanation.replace(/'/g, "\\'")}')" class="quiz-option-btn w-full text-left px-4 py-3 rounded-xl text-sm bg-darknavy border border-cardborder hover:border-electricblue text-gray-200 transition-all flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-lg bg-cardborder flex items-center justify-center font-bold text-electricblue">${letter}</span>
+                        <span>${opt}</span>
+                    </button>
+                `;
+            });
+            document.getElementById('quiz-modal-options').innerHTML = html;
+        }
+
+        function handleQuizAnswer(selected, correct, explanation) {
+            const optionsContainer = document.getElementById('quiz-modal-options');
+            const buttons = optionsContainer.getElementsByTagName('button');
+            
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === correct) {
+                    buttons[i].className = "w-full text-left px-4 py-3 rounded-xl text-sm bg-accentgreen/20 border border-accentgreen text-accentgreen flex items-center space-x-3";
+                } else if (i === selected && selected !== correct) {
+                    buttons[i].className = "w-full text-left px-4 py-3 rounded-xl text-sm bg-accentred/20 border border-accentred text-accentred flex items-center space-x-3";
+                }
+            }
+
+            const feedbackEl = document.getElementById('quiz-modal-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (selected === correct) {
+                correctQuizCount++;
+                feedbackEl.className = "p-4 rounded-xl text-xs bg-accentgreen/20 text-accentgreen border border-accentgreen/30";
+                feedbackEl.innerHTML = `<i class="fa-solid fa-check-circle mr-1 font-bold"></i> Correct! ${explanation}`;
+            } else {
+                feedbackEl.className = "p-4 rounded-xl text-xs bg-accentred/20 text-accentred border border-accentred/30";
+                feedbackEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1 font-bold"></i> Incorrect. ${explanation}`;
+                
+                // Save mistake
+                if (!appState.mistakes.some(m => m.question === activeQuizData[currentQuizIndex].question)) {
+                    appState.mistakes.push({
+                        question: activeQuizData[currentQuizIndex].question,
+                        explanation: explanation,
+                        correctOption: activeQuizData[currentQuizIndex].options[correct],
+                        level: currentSelectedLevel
+                    });
+                }
+            }
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+            saveState();
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            renderQuizQuestion();
+        }
+
+        function finishQuizAssessment() {
+            let total = activeQuizData.length;
+            let percentage = Math.round((correctQuizCount / total) * 100);
+            let passed = percentage >= 80; // 80% passing grade
+
+            appState.quizScores[currentSelectedLevel] = {
+                total: total,
+                correct: correctQuizCount,
+                passed: passed
+            };
+
+            if (passed && currentSelectedLevel < 5) {
+                if (appState.level < currentSelectedLevel + 1) {
+                    appState.level = currentSelectedLevel + 1;
+                }
+            }
+
+            checkAchievements();
+            saveState();
+
+            const modalContent = document.querySelector('#quiz-modal > div');
+            modalContent.innerHTML = `
+                <div class="text-center space-y-4 py-6">
+                    <div class="w-16 h-16 rounded-full ${passed ? 'bg-accentgreen/20 text-accentgreen border border-accentgreen' : 'bg-accentred/20 text-accentred border border-accentred'} mx-auto flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid ${passed ? 'fa-trophy' : 'fa-circle-xmark'}"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white">${passed ? 'Assessment Passed!' : 'Assessment Not Passed'}</h3>
+                    <p class="text-gray-400 text-sm">You scored ${correctQuizCount} out of ${total} (${percentage}%). ${passed ? 'Next level unlocked!' : 'You need at least 80% to unlock the next level. Review the lessons and try again!'}</p>
+                    <div class="pt-4 flex justify-center space-x-3">
+                        <button onclick="closeQuizModal()" class="bg-electricblue hover:bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors">
+                            Return to Lessons
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+            // Re-render dashboard/lessons
+            location.reload(); // Simple reload to refresh all state binds cleanly
+        }
+
+        /* ==========================================
+           5. VIRTUAL TRADING SIMULATOR
+           ========================================== */
+        let activeStockTicker = 'TSLA';
+        let stockPrices = { TSLA: 245.50, AAPL: 182.20, NVDA: 875.40 };
+        let priceHistoryData = { TSLA: [240, 242, 241, 244, 245.50], AAPL: [180, 181, 181.5, 182, 182.20], NVDA: [860, 865, 870, 872, 875.40] };
+        let tradingChartInstance = null;
+
+        function selectStock(ticker) {
+            activeStockTicker = ticker;
+            document.getElementById('order-ticker-label').innerText = ticker;
+            document.getElementById('active-stock-price').innerText = `$${stockPrices[ticker].toFixed(2)}`;
+            document.getElementById('order-stoploss').value = (stockPrices[ticker] * 0.95).toFixed(2);
+            
+            document.querySelectorAll('.stock-btn').forEach(btn => {
+                if (btn.getAttribute('data-ticker') === ticker) {
+                    btn.className = "stock-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-electricblue text-white shadow-md shadow-electricblue/20";
+                } else {
+                    btn.className = "stock-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-darknavy text-gray-400 border border-cardborder";
+                }
+            });
+            calculateOrderTotal();
+            updateChartData();
+        }
+
+        function calculateOrderTotal() {
+            let shares = parseInt(document.getElementById('order-shares').value) || 0;
+            let price = stockPrices[activeStockTicker];
+            let stopLoss = parseFloat(document.getElementById('order-stoploss').value) || 0;
+            let cost = shares * price;
+            let risk = shares * (price - stopLoss);
+
+            document.getElementById('order-est-cost').innerText = `$${cost.toFixed(2)}`;
+            document.getElementById('order-max-risk').innerText = risk > 0 ? `$${risk.toFixed(2)}` : '$0.00';
+        }
+
+        function executeBuyOrder() {
+            let shares = parseInt(document.getElementById('order-shares').value) || 0;
+            let price = stockPrices[activeStockTicker];
+            let stopLoss = parseFloat(document.getElementById('order-stoploss').value) || 0;
+            let cost = shares * price;
+
+            if (shares <= 0) {
+                showToast("Please enter a valid number of shares.", "error");
+                return;
+            }
+            if (cost > appState.simulator.cash) {
+                showToast("Insufficient virtual cash balance!", "error");
+                return;
+            }
+            if (stopLoss >= price) {
+                showToast("Stop-loss price must be below buy price for a long position.", "error");
+                return;
+            }
+
+            appState.simulator.cash -= cost;
+            appState.simulator.holdings.push({
+                id: Date.now(),
+                ticker: activeStockTicker,
+                shares: shares,
+                entryPrice: price,
+                stopLoss: stopLoss
+            });
+
+            saveState();
+            renderSimulatorTables();
+            showToast(`Successfully bought ${shares} shares of ${activeStockTicker} at $${price.toFixed(2)}!`, "success");
+        }
+
+        function sellHolding(id) {
+            let idx = appState.simulator.holdings.findIndex(h => h.id === id);
+            if (idx === -1) return;
+
+            let h = appState.simulator.holdings[idx];
+            let currentPrice = stockPrices[h.ticker];
+            let revenue = h.shares * currentPrice;
+            let pnl = (currentPrice - h.entryPrice) * h.shares;
+
+            appState.simulator.cash += revenue;
+            appState.simulator.history.unshift({
+                ticker: h.ticker,
+                type: 'Sell',
+                shares: h.shares,
+                entryPrice: h.entryPrice,
+                exitPrice: currentPrice,
+                pnl: pnl
+            });
+
+            appState.simulator.holdings.splice(idx, 1);
+            saveState();
+            renderSimulatorTables();
+            showToast(`Sold ${h.shares} shares of ${h.ticker}. P&L: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`, pnl >= 0 ? 'success' : 'error');
+        }
+
+        function renderSimulatorTables() {
+            // Cash & portfolio
+            let holdingsVal = 0;
+            appState.simulator.holdings.forEach(h => {
+                holdingsVal += h.shares * stockPrices[h.ticker];
+            });
+            let netWorth = appState.simulator.cash + holdingsVal;
+            let totalPnl = netWorth - 10000.00;
+            let pnlPct = (totalPnl / 10000.00) * 100;
+
+            document.getElementById('sim-cash').innerText = `$${appState.simulator.cash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('sim-portfolio-value').innerText = `$${holdingsVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('sim-net-worth').innerText = `$${netWorth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            let pnlEl = document.getElementById('sim-total-pnl');
+            pnlEl.innerText = `${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)} (${pnlPct.toFixed(2)}%)`;
+            pnlEl.className = `text-2xl font-bold mt-2 ${totalPnl >= 0 ? 'text-accentgreen' : 'text-accentred'}`;
+
+            // Holdings table
+            let hHtml = '';
+            if (appState.simulator.holdings.length === 0) {
+                hHtml = `<tr><td colspan="6" class="py-6 text-center text-gray-500">No active positions. Buy shares above to start trading.</td></tr>`;
+            } else {
+                appState.simulator.holdings.forEach(h => {
+                    let cur = stockPrices[h.ticker];
+                    let pnl = (cur - h.entryPrice) * h.shares;
+                    let pnlColor = pnl >= 0 ? 'text-accentgreen' : 'text-accentred';
+                    hHtml += `
+                        <tr class="border-b border-cardborder">
+                            <td class="py-3 px-3 font-bold text-white">${h.ticker}</td>
+                            <td class="py-3 px-3">${h.shares}</td>
+                            <td class="py-3 px-3">$${h.entryPrice.toFixed(2)}</td>
+                            <td class="py-3 px-3">$${cur.toFixed(2)}</td>
+                            <td class="py-3 px-3 font-bold ${pnlColor}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</td>
+                            <td class="py-3 px-3 text-right">
+                                <button onclick="sellHolding(${h.id})" class="bg-accentred/20 hover:bg-accentred text-accentred hover:text-white px-3 py-1 rounded-lg text-xs font-semibold transition-all">Sell</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('holdings-table-body').innerHTML = hHtml;
+
+            // History table
+            let histHtml = '';
+            if (appState.simulator.history.length === 0) {
+                histHtml = `<tr><td colspan="6" class="py-6 text-center text-gray-500">No completed trades yet.</td></tr>`;
+            } else {
+                appState.simulator.history.forEach(t => {
+                    let pnlColor = t.pnl >= 0 ? 'text-accentgreen' : 'text-accentred';
+                    histHtml += `
+                        <tr class="border-b border-cardborder">
+                            <td class="py-3 px-3 font-bold text-white">${t.ticker}</td>
+                            <td class="py-3 px-3 text-gray-400">${t.type}</td>
+                            <td class="py-3 px-3">${t.shares}</td>
+                            <td class="py-3 px-3">$${t.entryPrice.toFixed(2)}</td>
+                            <td class="py-3 px-3">$${t.exitPrice.toFixed(2)}</td>
+                            <td class="py-3 px-3 text-right font-bold ${pnlColor}">${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+            document.getElementById('history-table-body').innerHTML = histHtml;
+        }
+
+        function resetSimulator() {
+            appState.simulator = {
+                cash: 10000.00,
+                holdings: [],
+                history: []
+            };
+            saveState();
+            renderSimulatorTables();
+            showToast("Simulator reset to $10,000.00 starting balance.", "info");
+        }
+
+        // Initialize Chart.js
+        function initChart() {
+            const ctx = document.getElementById('tradingChart').getContext('2d');
+            if (tradingChartInstance) {
+                tradingChartInstance.destroy();
+            }
+
+            tradingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1m ago', '45s ago', '30s ago', '15s ago', 'Now'],
+                    datasets: [{
+                        label: activeStockTicker,
+                        data: priceHistoryData[activeStockTicker],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(31, 41, 55, 0.5)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(31, 41, 55, 0.5)' }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function updateChartData() {
+            if (!tradingChartInstance) return;
+            let current = stockPrices[activeStockTicker];
+            // Simulate random tick fluctuation
+            let delta = (Math.random() - 0.48) * 1.5;
+            current = Math.max(10, current + delta);
+            stockPrices[activeStockTicker] = current;
+            document.getElementById('active-stock-price').innerText = `$${current.toFixed(2)}`;
+
+            // Update chart dataset
+            let dataArr = priceHistoryData[activeStockTicker];
+            dataArr.shift();
+            dataArr.push(current);
+
+            tradingChartInstance.data.datasets[0].label = activeStockTicker;
+            tradingChartInstance.data.datasets[0].data = dataArr;
+            tradingChartInstance.update('none');
+
+            // Check stop losses for holdings
+            appState.simulator.holdings.forEach(h => {
+                if (h.ticker === activeStockTicker && current <= h.stopLoss) {
+                    // Stop loss triggered!
+                    sellHoldingDueToStopLoss(h.id, current);
+                }
+            });
+        }
+
+        function sellHoldingDueToStopLoss(id, exitPrice) {
+            let idx = appState.simulator.holdings.findIndex(h => h.id === id);
+            if (idx === -1) return;
+            let h = appState.simulator.holdings[idx];
+            let revenue = h.shares * exitPrice;
+            let pnl = (exitPrice - h.entryPrice) * h.shares;
+
+            appState.simulator.cash += revenue;
+            appState.simulator.history.unshift({
+                ticker: h.ticker,
+                type: 'Stop-Loss Hit',
+                shares: h.shares,
+                entryPrice: h.entryPrice,
+                exitPrice: exitPrice,
+                pnl: pnl
+            });
+            appState.simulator.holdings.splice(idx, 1);
+            saveState();
+            renderSimulatorTables();
+            showToast(`Stop-loss triggered for ${h.ticker} at $${exitPrice.toFixed(2)}! P&L: $${pnl.toFixed(2)}`, 'error');
+        }
+
+        // Start live ticker simulation loop
+        setInterval(() => {
+            ['TSLA', 'AAPL', 'NVDA'].forEach(t => {
+                let delta = (Math.random() - 0.48) * 1.2;
+                stockPrices[t] = Math.max(10, stockPrices[t] + delta);
+            });
+            // If simulator tab is active, update active price & holdings
+            if (document.getElementById('tab-simulator') && !document.getElementById('tab-simulator').classList.contains('hidden')) {
+                document.getElementById('active-stock-price').innerText = `$${stockPrices[activeStockTicker].toFixed(2)}`;
+                updateChartData();
+                renderSimulatorTables();
+            }
+        }, 3000);
+
+
+        /* ==========================================
+           6. RISK CALCULATOR
+           ========================================== */
+        function calculateRisk() {
+            let buy = parseFloat(document.getElementById('calc-buy').value) || 0;
+            let exit = parseFloat(document.getElementById('calc-exit').value) || 0;
+            let shares = parseInt(document.getElementById('calc-shares').value) || 0;
+            let fees = parseFloat(document.getElementById('calc-fees').value) || 0;
+
+            let lossPerShare = buy - exit;
+            let totalLoss = lossPerShare * shares;
+            let totalCost = buy * shares;
+            let pctChange = buy > 0 ? ((exit - buy) / buy) * 100 : 0;
+            let withFees = totalCost + fees;
+
+            document.getElementById('res-loss-share').innerText = `$${lossPerShare.toFixed(2)}`;
+            document.getElementById('res-total-loss').innerText = `$${totalLoss.toFixed(2)}`;
+            document.getElementById('res-total-cost').innerText = `$${totalCost.toFixed(2)}`;
+            document.getElementById('res-pct-change').innerText = `${pctChange.toFixed(2)}%`;
+            document.getElementById('res-with-fees').innerText = `$${withFees.toFixed(2)}`;
+
+            if (totalLoss > 0) {
+                appState.achievements.calc_expert = true;
+                saveState();
+            }
+        }
+
+
+        /* ==========================================
+           7. PRACTICE CHALLENGES
+           ========================================== */
+        const challengesList = [
+            {
+                prompt: "You plan to buy 25 shares of AAPL at $180 with a stop-loss at $174. What is your planned dollar risk?",
+                options: ["$6", "$150", "$4,350", "$4,500"],
+                correct: 1,
+                hint: "($180 − $174) = $6 risk per share × 25 shares."
+            },
+            {
+                prompt: "Your risk is $40 and your planned reward is $120. What is your risk-to-reward ratio?",
+                options: ["1:1", "1:2", "1:3", "3:1"],
+                correct: 2,
+                hint: "$40 to $120 simplifies to 1:3."
+            },
+            {
+                prompt: "Why might your actual exit price differ slightly from your planned stop-loss price?",
+                options: ["Brokerage software glitch", "Market slippage during fast price drops", "Dividends paid out", "SEC regulations"],
+                correct: 1,
+                hint: "Fast-moving markets cause stop orders to execute at available market prices."
+            }
+        ];
+
+        let currentChallengeIdx = 0;
+
+        function loadNewChallenge() {
+            currentChallengeIdx = Math.floor(Math.random() * challengesList.length);
+            const c = challengesList[currentChallengeIdx];
+
+            let html = `
+                <div class="space-y-4">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-electricblue">Scenario Challenge</span>
+                    <h3 class="text-lg font-bold text-white">${c.prompt}</h3>
+                    <div class="space-y-2 pt-2" id="challenge-options">
+            `;
+            c.options.forEach((opt, idx) => {
+                let letter = String.fromCharCode(65 + idx);
+                html += `
+                    <button onclick="answerChallenge(${idx}, ${c.correct}, '${c.hint.replace(/'/g, "\\'")}')" class="w-full text-left px-4 py-3 rounded-xl text-sm bg-darknavy border border-cardborder hover:border-electricblue text-gray-200 transition-all flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-lg bg-cardborder flex items-center justify-center font-bold text-electricblue">${letter}</span>
+                        <span>${opt}</span>
+                    </button>
+                `;
+            });
+            html += `</div><div id="challenge-feedback" class="p-3 rounded-xl text-xs hidden"></div></div>`;
+            document.getElementById('challenge-card').innerHTML = html;
+        }
+
+        function answerChallenge(selected, correct, hint) {
+            const feedback = document.getElementById('challenge-feedback');
+            feedback.classList.remove('hidden');
+            if (selected === correct) {
+                feedback.className = "p-3 rounded-xl text-xs bg-accentgreen/20 text-accentgreen border border-accentgreen/30";
+                feedback.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i> Correct! ${hint}`;
+                showToast("Challenge solved successfully!", "success");
+                appState.achievements.practice_champ = true;
+                saveState();
+            } else {
+                feedback.className = "p-3 rounded-xl text-xs bg-accentred/20 text-accentred border border-accentred/30";
+                feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Incorrect. Hint: ${hint}`;
+            }
+        }
+
+
+        /* ==========================================
+           8. MISTAKE REVIEW
+           ========================================== */
+        function renderMistakes() {
+            const container = document.getElementById('mistakes-container');
+            const badgeCount = document.getElementById('mistake-badge-count');
+
+            if (!appState.mistakes || appState.mistakes.length === 0) {
+                badgeCount.classList.add('hidden');
+                container.innerHTML = `
+                    <div class="bg-carddark p-8 rounded-2xl border border-cardborder text-center space-y-3">
+                        <div class="w-12 h-12 rounded-full bg-accentgreen/20 text-accentgreen flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-base">No mistakes recorded yet!</h3>
+                        <p class="text-xs text-gray-400">Any questions you answer incorrectly during quizzes will automatically appear here for review.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            badgeCount.innerText = appState.mistakes.length;
+            badgeCount.classList.remove('hidden');
+
+            let html = '';
+            appState.mistakes.forEach((m, idx) => {
+                html += `
+                    <div class="bg-carddark p-6 rounded-2xl border border-cardborder space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-electricblue bg-electricblue/10 px-2.5 py-1 rounded-full">Level ${m.level} Review</span>
+                            <button onclick="removeMistake(${idx})" class="text-xs text-gray-400 hover:text-white"><i class="fa-solid fa-trash"></i> Clear</button>
+                        </div>
+                        <h4 class="font-bold text-white text-sm">${m.question}</h4>
+                        <div class="p-3 bg-darknavy rounded-xl border border-cardborder text-xs space-y-1">
+                            <p class="text-accentgreen font-semibold"><i class="fa-solid fa-check mr-1"></i> Correct Answer: ${m.correctOption}</p>
+                            <p class="text-gray-400">Explanation: ${m.explanation}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function removeMistake(idx) {
+            appState.mistakes.splice(idx, 1);
+            saveState();
+            renderMistakes();
+        }
+
+
+        /* ==========================================
+           9. ACHIEVEMENTS & BADGES
+           ========================================== */
+        function checkAchievements() {
+            if (appState.completedLessons.length > 0) appState.achievements.first_lesson = true;
+            if (Object.keys(appState.quizScores).length > 0) appState.achievements.quiz_master = true;
+        }
+
+        function renderAchievements() {
+            const badges = [
+                { id: 'first_lesson', title: 'First Lesson Completed', desc: 'Complete your very first trading lesson.', icon: 'fa-graduation-cap' },
+                { id: 'risk_beginner', title: 'Risk Management Beginner', desc: 'Solve the daily risk challenge correctly.', icon: 'fa-shield-halved' },
+                { id: 'quiz_master', title: 'Quiz Master', desc: 'Pass a level assessment quiz.', icon: 'fa-brain' },
+                { id: 'calc_expert', title: 'Calculator Expert', desc: 'Use the risk calculator successfully.', icon: 'fa-calculator' },
+                { id: 'practice_champ', title: 'Practice Champion', desc: 'Solve a practice scenario challenge.', icon: 'fa-trophy' }
+            ];
+
+            let html = '';
+            badges.forEach(b => {
+                let unlocked = appState.achievements[b.id];
+                let bgClass = unlocked ? 'bg-carddark border-electricblue shadow-lg shadow-electricblue/10' : 'bg-darknavy/40 border-cardborder opacity-60';
+                let iconColor = unlocked ? 'bg-electricblue/20 text-electricblue' : 'bg-gray-800 text-gray-500';
+
+                html += `
+                    <div class="${bgClass} p-6 rounded-2xl border flex flex-col justify-between space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-xl ${iconColor} flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid ${b.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${b.title}</h4>
+                                <span class="text-xs ${unlocked ? 'text-accentgreen font-semibold' : 'text-gray-500'}">${unlocked ? '<i class="fa-solid fa-check mr-1"></i> Unlocked' : '<i class="fa-solid fa-lock mr-1"></i> Locked'}</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400">${b.desc}</p>
+                    </div>
+                `;
+            });
+            document.getElementById('achievements-grid').innerHTML = html;
+        }
+
+
+        /* ==========================================
+           10. SETTINGS & INITIALIZATION
+           ========================================== */
+        function updateStudentName() {
+            let name = document.getElementById('settings-name-input').value.trim();
+            if (name) {
+                appState.studentName = name;
+                saveState();
+                showToast("Student profile updated successfully!", "success");
+            }
+        }
+
+        function exportUserData() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            let dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "trading_academy_backup.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Backup JSON exported successfully!", "success");
+        }
+
+        function confirmResetAllData() {
+            if (confirm("Are you sure you want to reset all practice progress? This cannot be undone.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                appState = JSON.parse(JSON.stringify(defaultState));
+                saveState();
+                location.reload();
+            }
+        }
+
+        // Global UI Refresh binding
+        function updateUI() {
+            // Sidebar & Top Nav
+            document.getElementById('sidebar-username').innerText = appState.studentName;
+            document.getElementById('sidebar-initials').innerText = appState.studentName.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2) || 'ST';
+            document.getElementById('sidebar-rank').innerText = `Level ${appState.level} Trader`;
+            document.getElementById('sidebar-balance').innerText = `$${appState.simulator.cash.toLocaleString('en-US', {minimumFractionDigits: 2, maxFractionDigits: 2})}`;
+            document.getElementById('top-balance').innerText = `$${appState.simulator.cash.toLocaleString('en-US', {minimumFractionDigits: 2, maxFractionDigits: 2})}`;
+            document.getElementById('top-streak').innerText = appState.streak;
+
+            // Dashboard Stats
+            document.getElementById('dash-level').innerText = `Level ${appState.level}`;
+            let levelTitles = {1: 'Trading Basics', 2: 'Risk Management', 3: 'Trading Calculations', 4: 'Charts & Markets', 5: 'Practice & Review'};
+            document.getElementById('dash-level-title').innerText = levelTitles[appState.level] || '';
+            
+            let completedCount = appState.completedLessons.length;
+            document.getElementById('dash-completed-lessons').innerText = completedCount;
+            let totalPct = Math.round((completedCount / 25) * 100);
+            document.getElementById('dash-lesson-pct').innerText = `${totalPct}%`;
+            document.getElementById('course-progress-text').innerText = `${totalPct}% Complete`;
+            document.getElementById('course-progress-bar').style.width = `${totalPct}%`;
+            document.getElementById('dash-streak').innerText = appState.streak;
+
+            let quizKeys = Object.keys(appState.quizScores);
+            document.getElementById('dash-quizzes-taken').innerText = `${quizKeys.length} quizzes taken`;
+            if (quizKeys.length > 0) {
+                let sum = 0;
+                quizKeys.forEach(k => { sum += (appState.quizScores[k].correct / appState.quizScores[k].total) * 100; });
+                document.getElementById('dash-quiz-avg').innerText = `${Math.round(sum / quizKeys.length)}%`;
+            }
+
+            // Level locks on dashboard
+            for (let i = 2; i <= 3; i++) {
+                let unlocked = appState.level >= i || appState.quizScores[i-1]?.passed;
+                let badge = document.getElementById(`level-${i}-status`);
+                let icon = document.getElementById(`lvl-${i}-icon`);
+                if (unlocked) {
+                    badge.className = "text-xs px-2.5 py-1 rounded-full bg-electricblue/20 text-electricblue font-medium";
+                    badge.innerHTML = `Active`;
+                    icon.className = "w-8 h-8 rounded-lg bg-electricblue/20 text-electricblue flex items-center justify-center font-bold text-sm";
+                }
+            }
+
+            // Mistakes count
+            let mistakeBadge = document.getElementById('mistake-badge-count');
+            if (appState.mistakes && appState.mistakes.length > 0) {
+                mistakeBadge.innerText = appState.mistakes.length;
+                mistakeBadge.classList.remove('hidden');
+            } else {
+                mistakeBadge.classList.add('hidden');
+            }
+        }
+
+        // Window onload initialization
+        window.onload = function() {
+            updateUI();
+            renderCurrentLesson();
+            renderDailyQuizWidget();
+            calculateRisk();
+            renderSimulatorTables();
+        };
+    </script>
+</body>
+</html>
